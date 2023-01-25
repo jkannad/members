@@ -31,3 +31,42 @@ func About(w http.ResponseWriter, r *http.Request) {
 		StringMap: stringMap,
 	})
 }
+
+func MemberSearch(w http.ResponseWriter, r *http.Request) {
+	remoteIP := appConfig.Session.GetString(r.Context(), "remote_ip")
+	stringMap := make(map[string]string)
+	stringMap["father"] = "Janarthanan Kannadhasan"
+	stringMap["mother"] = "Vaidegi Rajagopalan"
+	stringMap["son"] = "Ashwin Janarthanan"
+	stringMap["remote_ip"] = remoteIP
+
+	render.RenderTemplate(w, "member-search.page.tmpl", &models.TemplateData{
+		StringMap: stringMap,
+	})
+}
+
+func MemberRegister(w http.ResponseWriter, r *http.Request) {
+	remoteIP := appConfig.Session.GetString(r.Context(), "remote_ip")
+	stringMap := make(map[string]string)
+	stringMap["father"] = "Janarthanan Kannadhasan"
+	stringMap["mother"] = "Vaidegi Rajagopalan"
+	stringMap["son"] = "Ashwin Janarthanan"
+	stringMap["remote_ip"] = remoteIP
+
+	render.RenderTemplate(w, "member-register.page.tmpl", &models.TemplateData{
+		StringMap: stringMap,
+	})
+}
+
+func MemberUpdate(w http.ResponseWriter, r *http.Request) {
+	remoteIP := appConfig.Session.GetString(r.Context(), "remote_ip")
+	stringMap := make(map[string]string)
+	stringMap["father"] = "Janarthanan Kannadhasan"
+	stringMap["mother"] = "Vaidegi Rajagopalan"
+	stringMap["son"] = "Ashwin Janarthanan"
+	stringMap["remote_ip"] = remoteIP
+
+	render.RenderTemplate(w, "member-update.page.tmpl", &models.TemplateData{
+		StringMap: stringMap,
+	})
+}

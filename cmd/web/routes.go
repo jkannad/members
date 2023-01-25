@@ -18,5 +18,7 @@ func routes(app *config.AppConfig) http.Handler {
 
 	mux.Get("/", handlers.Home)
 	mux.Get("/about", handlers.About)
+	mux.Get("/member/search", handlers.MemberSearch)
+	mux.Get("/member/register", handlers.MemberRegister)
 	return mux
 }

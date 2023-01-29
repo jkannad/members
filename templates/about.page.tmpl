@@ -1,20 +1,3 @@
 {{template "base" .}}
 {{define "content"}}
-    <div class="container">
-        <div class="row">
-            <div class="col">
-                <h1>This is the about page</h1>
-                <p>Father : {{index .StringMap "father"}}</p>
-                <p>Mother : {{index .StringMap "mother"}}</p>
-                <p>Son    : {{index .StringMap "son"}}</p>
-                <p>
-                    {{if ne (index .StringMap "remote_ip") ""}}
-                        Your IP address is {{index .StringMap "remote_ip"}}
-                    {{else}}
-                        Not got your IP address yet. Please visit the <a href="/"> Home Page.
-                    {{end}}
-                </p>
-            </div>
-        </div>
-    </div>
 {{end}}

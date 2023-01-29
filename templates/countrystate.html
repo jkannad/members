@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script type="text/javascript" src="countries.js"></script>
+</head>
+
+<body>
+
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-4">
+                <h3>Country</h3>
+                <select name="country" class="countries form-control" id="countryId" onchange="print_state('state',this.selectedIndex);"> 
+                </select>
+
+            </div>
+            <div class="col-sm-4">
+                <h3>State</h3>
+                <select name="state" class="states form-control" id="stateId">
+            </div>
+        </div>
+    </div>
+
+    <script language="javascript">print_country("country");</script>
+
+</body>
+
+</html>

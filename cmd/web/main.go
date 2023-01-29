@@ -1,14 +1,15 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"time"
 
 	"github.com/alexedwards/scs/v2"
-	"github.com/jkannad/spas/members/pkg/config"
-	"github.com/jkannad/spas/members/pkg/handlers"
-	"github.com/jkannad/spas/members/pkg/render"
+	"github.com/jkannad/spas/members/internal/config"
+	"github.com/jkannad/spas/members/internal/handlers"
+	"github.com/jkannad/spas/members/internal/render"
 )
 
 const PortNumber = ":1709"
@@ -42,6 +43,7 @@ func main() {
 		Addr:    PortNumber,
 		Handler: routes(&app),
 	}
+	fmt.Println("Application started at port :1709")
 	err = srv.ListenAndServe()
 	if err != nil {
 		log.Fatal("Error starting server", err)

@@ -12,4 +12,5 @@ type AppConfig struct {
 	TemplateCache map[string]*template.Template
 	IsProduction  bool
 	Session       *scs.SessionManager
+	FormConfig 	  map[string]map[string]FieldConfig
 }

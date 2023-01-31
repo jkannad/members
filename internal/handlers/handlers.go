@@ -49,10 +49,12 @@ type upsertResponse struct {
 }
 
 func UpsertMember(w http.ResponseWriter, r *http.Request) {
+
 	response := upsertResponse{
 		Ok:      true,
 		Message: "Member's details were saved successfully",
 	}
+	r.FormValue
 	out, err := json.MarshalIndent(response, "", "    ")
 	if err != nil {
 		log.Println(err)

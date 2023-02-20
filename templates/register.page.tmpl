@@ -4,16 +4,19 @@
         <div class="col-md-7 col-lg-8">
             <form id="upsert_form" class="needs-validation" novalidate  action="" method="">
                 <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+                <input type="hidden" id="id" name="id" value="{{$.Data.member.Id}}">
                 <div class="d-flex justify-content-center">
                     <div class="row g-3">
                         <div class="col-md-2">
                             <label for="title" class="form-label">Title</label>
                             <select class="form-select" id="title" name="title" required>
                                 <option value="">Choose...</option>
-                                <option>Mr.</option>
-                                <option>Miss.</option>
-                                <option>Mrs.</option>
-                                <option>Ms.</option>
+                                <option value="Mr." {{if eq $.Data.member.Title "Mr."}} selected="selected"{{end}}>Mr.</option>
+                                <option value="Ms."  {{if eq $.Data.member.Title "Ms."}} selected="selected"{{end}}>Ms.</option>
+                                <option value="Mrs."  {{if eq $.Data.member.Title "Mrs."}} selected="selected"{{end}}>Mrs.</option>
+                                <option value="Miss." {{if eq $.Data.member.Title "Miss."}} selected="selected"{{end}}>Miss.</option>
+                                <option value="Dr."  {{if eq $.Data.member.Title "Dr."}} selected="selected"{{end}}>Dr.</option>
+                                <option value="Prof."  {{if eq $.Data.member.Title "Prof."}} selected="selected"{{end}}>Prof.</option>
                             </select>
                             <div class="invalid-feedback">
                                 Please choose title.
@@ -22,8 +25,8 @@
 
                         <div class="col-sm-5">
                             <label for="first_name" class="form-label">First name</label>
-                            <input required type="text" class="form-control" id="first_name" name="first_name"
-                                placeholder="" value="" required>
+                            <input required type="text" pattern="^[A-Za-z -]+$" class="form-control" id="first_name" name="first_name"
+                                placeholder="" value="{{$.Data.member.FirstName}}" required>
                             <div class="invalid-feedback">
                                 Please enter first name.
                             </div>
@@ -31,8 +34,8 @@
 
                         <div class="col-sm-5">
                             <label for="last_name" class="form-label">Last name</label>
-                            <input required type="text" class="form-control" id="last_name" name="last_name"
-                                placeholder="" value="" required>
+                            <input required type="text" pattern="^[A-Za-z -]+$" class="form-control" id="last_name" name="last_name"
+                                placeholder="" value="{{$.Data.member.LastName}}" required>
                             <div class="invalid-feedback">
                                 Please enter last name.
                             </div>
@@ -40,28 +43,27 @@
 
                         <div class="col-sm-5">
                             <label for="dob" class="form-label">Date of Birth</label>
-                            <input type="text" class="form-control" id="dob" name="dob" placeholder="" value=""
-                                required>
+                            <input type="text" class="form-control" id="dob" name="dob" placeholder="" value="{{$.Data.member.Dob}}">
                             <div class="invalid-feedback">
                                 Please select date of birth.
                             </div>
                         </div>
 
                         <div class="col-sm-2">
-                            <label for="sex" class="form-label">Sex</label>
-                            <select class="form-select" id="sex" name="sex" required>
+                            <label for="gender" class="form-label">Gender</label>
+                            <select class="form-select" id="gender" name="gender" required>
                                 <option value="">Choose...</option>
-                                <option>Male</option>
-                                <option>Female</option>
+                                <option value="Male" {{if eq $.Data.member.Gender "Male"}}selected="selected"{{end}}>Male</option>
+                                <option value="Female" {{if eq $.Data.member.Gender "Female"}}selected="selected"{{end}}>Female</option>
                             </select>
                             <div class="invalid-feedback">
-                                Please choose sex.
+                                Please choose gender.
                             </div>
                         </div>
 
                         <div class="col-sm-5">
                             <label for="doj" class="form-label">Date of Join</label>
-                            <input type="text" class="form-control" id="doj" name="doj" placeholder="" value=""
+                            <input type="text" class="form-control" id="doj" name="doj" placeholder="" value="{{$.Data.member.Doj}}"
                                 required>
                             <div class="invalid-feedback">
                                 Please select date of join.
@@ -70,25 +72,34 @@
 
                         <div class="col-12">
                             <label for="address" class="form-label">Address</label>
-                            <input required type="text" class="form-control" id="address1" name="address1"
-                                placeholder="">
+                            <input required type="text" pattern="^[0-9A-Za-z /,-]+$" class="form-control" id="address1" name="address1"
+                                value="{{$.Data.member.Address1}}" placeholder="">
                             <div class="invalid-feedback">
                                 Please enter member address.
                             </div>
                         </div>
 
-                        <div class="col-12">
+                        <div class="col-6">
                             <label for="address2" class="form-label">Address 2 <span
                                     class="text-muted">(Optional)</span></label>
-                            <input type="text" class="form-control" id="address2" name="address2"
-                                placeholder="">
+                            <input type="text" pattern="^[0-9A-Za-z /,-]+$" class="form-control" id="address2" name="address2"
+                                value="{{$.Data.member.Address2}}" placeholder="">
                         </div>
 
-                        <div class="col-md-5">
+                        <div class="col-6">
+                            <label for="area" class="form-label">Area<span
+                                    class="text-muted">(Optional)</span></label>
+                            <input type="text" pattern="^[A-Za-z -]+$" class="form-control" id="area" name="area"
+                                value="{{$.Data.member.Area}}" placeholder="" required>
+                        </div>
+
+                        <div class="col-md-4">
                             <label for="country" class="form-label">Country</label>
                             <select class="form-select" id="country" name="country" required>
                                 <option value="">Choose...</option>
-                                <option>United States</option>
+                                {{range .Countries}}
+                                    <option value={{.IsoCode}} {{if eq $.Data.member.Country .IsoCode }} selected="selected" {{end}}>{{.Name}}</option>
+                                {{end}}
                             </select>
                             <div class="invalid-feedback">
                                 Please choose country.
@@ -99,39 +110,56 @@
                             <label for="state" class="form-label">State</label>
                             <select class="form-select" id="state" name="state" required>
                                 <option value="">Choose...</option>
-                                <option>California</option>
+                                {{range .States}}
+                                    <option value={{.IsoCode}} {{if eq $.Data.member.State .IsoCode}} selected="selected" {{end}}>{{.Name}}</option>
+                                {{end}}
                             </select>
                             <div class="invalid-feedback">
                                 Please choose state.
                             </div>
                         </div>
 
-                        <div class="col-md-3">
-                            <label for="postal_code" class="form-label">Postal Code</label>
-                            <input type="text" class="form-control" id="postal_code" name="postal_code"
-                                placeholder="" required>
+                        <div class="col-md-4">
+                            <label for="city" class="form-label">City</label> 
+                            <span class="text-muted">(Optional)</span>
+                            <select class="form-select" id="city" name="city" >
+                                <option value="">Choose...</option>
+                                {{range .Cities}}
+                                    <option value={{.Name}} {{if eq $.Data.member.City .Name}} selected="selected" {{end}}>{{.Name}}</option>
+                                {{end}}
+                            </select>
                             <div class="invalid-feedback">
-                                Postal enter post code.
+                                Please choose city.
                             </div>
                         </div>
 
-                        <div class="col-sm-6">
+                        <div class="col-md-3">
+                            <label for="postal_code" class="form-label">Postal Code</label> <span
+                                    class="text-muted">(Optional)</span></label>
+                            <input type="number" class="form-control" id="postal_code" name="postal_code"
+                                value="{{$.Data.member.PostalCode}}" placeholder="">
+                            <div class="invalid-feedback">
+                                Please enter post code.
+                            </div>
+                        </div>
+
+                        <div class="col-sm-4">
                             <label for="contact_number" class="form-label">Contact Number</label>
-                            <div class="input-group mb-3">
-                                <span class="input-group-text" id="contact_number"
-                                    name="contact_number">+91</span>
-                                <input required type="text" class="form-control" placeholder="" aria-label=""
-                                    aria-describedby="basic-addon1">
-                                <div class="invalid-feedback">
-                                    Please enter contact number.
-                                </div>
+                            <div class="input-group">
+                                <span class="input-group-text" id="dial_code_span">{{$.Data.member.DialCode}}</span>
+                                <input type="hidden" id="dial_code" name="dial_code" value="{{$.Data.member.DialCode}}">
+                                <input type="number" class="form-control" min=0 id="contact_number" name="contact_number" 
+                                    value="{{$.Data.member.ContactNumber}}" placeholder="" required>
+                            </div>
+                            <div class="invalid-feedback">
+                                Please enter contact number.
                             </div>
                         </div>
 
-                        <div class="col-sm-6">
+                        <div class="col-sm-5">
                             <label for="email" class="form-label">Email <span
                                     class="text-muted">(Optional)</span></label>
-                            <input type="email" class="form-control" id="email" name="email" placeholder="">
+                            <input type="email" class="form-control" id="email" name="email" value="{{$.Data.member.Email}}" placeholder="">
                             <div class="invalid-feedback">
                                     Please enter valid email address.
                             </div>
@@ -139,9 +167,9 @@
                     </div>
                 </div>
                 <hr class="my-6">
-                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                <div class="d-grid gap-2 col-2 d-md-flex mx-auto">
                     <button id="save-btn" class="btn btn-success" type="button">Save</button>
-                    <button class="btn btn-success" type="button">Cancel</button>
+                    <button id="cancel-btn" class="btn btn-success" type="button">Reset</button>
                 </div>
             </form>
         </div>
@@ -150,7 +178,6 @@
 {{define "js"}}
     <script>
         let notify = Prompt()
-        
         const dob = document.getElementById('dob');
         const dob_datepicker = new Datepicker(dob, {
             format: "dd-mm-yyyy",
@@ -159,6 +186,14 @@
         const doj_datepicker = new Datepicker(doj, {
             format: "dd-mm-yyyy",
         });
+
+        document.getElementById("cancel-btn").addEventListener("click", function() {
+            if (document.getElementById("id").value == "") {
+                window.location.replace("/member/register")
+            } else {
+                document.getElementById("upsert_form").reset()
+            }
+        })
 
         document.getElementById("save-btn").addEventListener("click", function() {
             let form = document.getElementById("upsert_form");
@@ -170,8 +205,7 @@
                 let form = document.getElementById("upsert_form");
                 let formData = new FormData(form);
                 formData.append("csrf_token","{{.CSRFToken}}")
-
-                fetch('/member/upsert/v1', {
+                fetch('/member/upsert', {
                     method: "post",
                     body: formData,
                 })
@@ -190,6 +224,13 @@
                             footer: "",
                         })
                     }
+                })
+                .catch(error => {
+                    notify.error({
+                        title: "Error",
+                        msg: "Internal Server Error. Please try later or get in touch with system adminstrator",
+                        footer: "",
+                    })
                 });
             }
         }); 
@@ -203,12 +244,18 @@
                     footer = "",
                 } = c
 
-                swal({
+                Swal.fire({
                     icon: 'success',
                     title: title,
                     text: msg,
                     footer: footer,
+                    didClose: () => {
+                        if (document.getElementById("id").value == "") {
+                            window.location.replace("/member/register")
+                        }
+                    },
                 })
+                
             }
 
             let error = function (c) {
@@ -218,7 +265,7 @@
                     footer = "",
                 } = c
 
-                swal({
+                Swal.fire({
                     icon: 'error',
                     title: title,
                     text: msg,
@@ -233,7 +280,7 @@
                     footer = "",
                 } = c
 
-                swal({
+                Swal.fire({
                     icon: 'warning',
                     title: title,
                     text: msg,
@@ -248,4 +295,5 @@
             }
         }
     </script>
+    <script type="text/javascript" src="/static/js/countrystate.js"></script>
 {{end}}

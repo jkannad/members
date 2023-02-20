@@ -49,7 +49,6 @@ func RenderTemplate(w http.ResponseWriter, r *http.Request, tmpl string, td *mod
 	if err != nil {
 		log.Println("Error writing to response writer")
 	}
-
 }
 
 func CreateTemplateCache() (map[string]*template.Template, error) {

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"os"
 	"fmt"
 	"log"
 	"net/http"
@@ -10,6 +11,7 @@ import (
 	"github.com/jkannad/spas/members/internal/config"
 	"github.com/jkannad/spas/members/internal/handlers"
 	"github.com/jkannad/spas/members/internal/render"
+	"github.com/jkannad/spas/members/internal/helper"
 )
 
 const PortNumber = ":1709"
@@ -28,6 +30,7 @@ func main() {
 	app.Session = session
 
 	templateCache, err := render.CreateTemplateCache()
+	formFieldConfig := config.BuildFormFieldConfigs()
 
 	if err != nil {
 		log.Fatal("Cannot create template cache", err)
@@ -35,9 +38,14 @@ func main() {
 
 	app.TemplateCache = templateCache
 	app.UseCache = false
+	app.FormFieldConfig = formFieldConfig
+	app.InfoLogger = log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
+	app.ErrorLogger = log.New(os.Stdout, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
 
 	render.NewTemplate(&app)
 	handlers.SetAppConfig(&app)
+	helper.New(&app)
+
 
 	srv := &http.Server{
 		Addr:    PortNumber,

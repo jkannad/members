@@ -3,9 +3,7 @@ package handlers
 import (
 	"fmt"
 	"encoding/json"
-	//"log"
 	"net/http"
-	//"errors"
 	"strconv"
 
 	"github.com/jkannad/spas/members/internal/config"
@@ -61,8 +59,28 @@ func Search(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+func PostLogin(w http.ResponseWriter, r *http.Request) {
+	_ = appConfig.Session.RenewToken(r.Context()) //It helps in preventing session fixation attack
+	err := r.ParseForm()
+	if err != nil {
+		helper.ServerError(w, err)
+		return
+	}
+
+	userName := r.FormValue("user_name")
+	password := r.FormValue("password")
+
+	fmt.Println(userName, password)
+
+}
+
 func SearchResult(w http.ResponseWriter, r *http.Request) {
 	//remoteIP := appConfig.Session.GetString(r.Context(), "remote_ip")
+	err := r.ParseForm()
+	if err != nil {
+		helper.ServerError(w, err)
+		return
+	}
 	stringMap := make(map[string]string)
 	stringMap["title"] = "Search Result"
 	search := models.Search {
@@ -126,7 +144,6 @@ func UpsertMember(w http.ResponseWriter, r *http.Request) {
 		helper.ServerError(w, err)
 		return
 	}
-	fmt.Println("Dial Code:", r.FormValue("dial_code"))
 	member := models.Member {
 		Title: r.FormValue("title"),
 		FirstName: r.FormValue("first_name"),
@@ -247,15 +264,6 @@ func GetAllMembers(w http.ResponseWriter, r *http.Request) {
 	render.RenderTemplate(w, r, "search.result.page.tmpl", &models.TemplateData{
 		StringMap: stringMap,
 		Data: data,
-	})
-}
-
-func SearchMember(w http.ResponseWriter, r *http.Request) {
-	//remoteIP := appConfig.Session.GetString(r.Context(), "remote_ip")
-	stringMap := make(map[string]string)
-	stringMap["title"] = "Update Member"
-	render.RenderTemplate(w, r, "update.page.tmpl", &models.TemplateData{
-		StringMap: stringMap,
 	})
 }
 

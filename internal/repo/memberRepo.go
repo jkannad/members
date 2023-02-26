@@ -5,6 +5,9 @@ import (
 	"log"
 	"database/sql"
 	"strings"
+	"time"
+	"errors"
+	"golang.org/x/crypto/bcrypt"
 	"github.com/jkannad/spas/members/internal/models"
 	"github.com/jkannad/spas/members/internal/helper"
 	_ "github.com/mattn/go-sqlite3"
@@ -14,20 +17,26 @@ const (
 	DB_ENGINE = "sqlite3"
 	DB_NAME = "data/spaa.db"
 	INSERT_MEMBER_SQL = `insert into member(title, first_name, last_name, gender, dob, doj, address1,
-							address2, area, country, state, city, postal_code, dial_code, phone, email) 
-						   	values( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+							address2, area, country, state, city, postal_code, dial_code, phone, email, created_by, created_at) 
+						   	values( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
 	UPDATE_MEMBER_SQL = `update member set title=?, first_name=?, last_name=?, gender=?, dob=?,
-						   	doj=?, address1=?, address2=?, area=?, country=?, state=?, city=?, postal_code=?, dial_code=?, phone=?, email=?
+						   	doj=?, address1=?, address2=?, area=?, country=?, state=?, city=?, postal_code=?, dial_code=?, phone=?, email=?, updated_by=?, updated_at=?
 						   	where id=?`
 	SELECT_MEMBER_BY_ID_SQL = `select id, title, first_name, last_name, gender, dob, doj, address1,
 								 	address2, area, country, state, city, postal_code, dial_code, phone, email 
 								 	from member where id=?`
-	SELECT_MEMBER_ALL = `select id, first_name, last_name, gender, area, cn.name country, st.name state, city, postal_code, dial_code, phone, email 
-							from member m, countries cn, states st
+	SELECT_MEMBER_ALL_SQL = `select id, first_name, last_name, gender, area, cn.name country, st.name state, city, postal_code, dial_code, phone, email 
+								from member m, countries cn, states st
 							where m.country=cn.cd and m.state=st.cd and cn.cd = st.country_cd order by first_name asc`
-	SEARCH_MEMBERS = `select id, first_name, last_name, gender, area, cn.name country, st.name state, city, postal_code, dial_code, phone, email 
-						from member m, countries cn, states st
-						where m.country=cn.cd and m.state=st.cd and cn.cd = st.country_cd `
+	SEARCH_MEMBERS_SQL = `select id, first_name, last_name, gender, area, cn.name country, st.name state, city, postal_code, dial_code, phone, email 
+							from member m, countries cn, states st
+							where m.country=cn.cd and m.state=st.cd and cn.cd = st.country_cd `
+	INSERT_USER_SQL = `insert into user (user_name, first_name, last_name, password, dial_code, phone, email, access_level, created_by, created_at)
+						values (?, ?, ?, ?, ?, ?, ?, ?, ?, ? )`
+	UPDATE_PASSWORD_SQL = `update user set password=?, updated_by=?, updated_at=? where user_name=?`
+	UPDATE_USER_SQL = `update user set first_name=?, last_name=?, dial_code=?, phone=?, email=?, updated_by=?, updated_at=? where user_name=?`
+	SELECT_USER_BY_NAME_SQL = `select user_name, first_name, last_name, phone, email, access_level from user where user_name = ?`
+	VALIDATE_USER_SQL = `select password from user where user_name=?`
 )
 
 //AddMember add a member to the database 
@@ -50,6 +59,8 @@ func AddMember(member *models.Member) error {
 
 	defer stmt.Close()
 
+	currentTime := time.Now()
+
 	result, err := stmt.Exec(
 		member.Title,
 		member.FirstName,
@@ -67,6 +78,8 @@ func AddMember(member *models.Member) error {
 		member.DialCode,
 		member.ContactNumber,
 		member.Email,
+		member.CreatedBy,
+		currentTime.String(),
 	)
 
 	if err != nil {
@@ -118,6 +131,8 @@ func UpdateMember(member *models.Member) error{
 		member.ContactNumber,
 		member.Email,
 		member.Id,
+		member.UpdatedBy,
+		time.Now().String(),
 	)
 
 	if err != nil {
@@ -178,6 +193,203 @@ func GetMemberById(id int) (*models.Member, error){
 	return &member, nil
 }
 
+//AddUser adds the user
+func AddUser(user *models.User) error {
+	db, err := sql.Open(DB_ENGINE, DB_NAME)
+	
+	if err != nil {
+		helper.ServiceError(err)
+		return err
+	}
+
+	defer db.Close()
+
+	stmt, err := db.Prepare(INSERT_USER_SQL)
+
+	if err != nil {
+		helper.ServiceError(err)
+		return err
+	}
+
+	defer stmt.Close()
+
+	result, err := stmt.Exec(
+		user.UserName,
+		user.FirstName,
+		user.LastName,
+		user.DialCode,
+		user.ContactNumber,
+		user.Email,
+		user.AccessLevel,
+		user.CreatedBy,
+		time.Now().String(),
+	)
+
+	if err != nil {
+		helper.ServiceError(err)
+		return err
+	}
+
+	lastInsertId, _ := result.LastInsertId()
+	rowsAffected, _ := result.RowsAffected()
+	log.Printf("Last inserted Id %d. Affected rows %d\n", lastInsertId, rowsAffected)
+	return nil
+}
+
+//UpdateUser updates the user details
+func UpdateUser(user *models.User) error {
+	db, err := sql.Open(DB_ENGINE, DB_NAME)
+
+	if err != nil {
+		helper.ServiceError(err)
+		return err
+	}
+
+	defer db.Close()
+
+	stm, err := db.Prepare(UPDATE_USER_SQL)
+
+	if err != nil {
+		helper.ServiceError(err)
+		return err
+	}
+
+	defer stm.Close()
+
+	result, err := stm.Exec(
+		user.FirstName,
+		user.LastName,
+		user.DialCode,
+		user.ContactNumber,
+		user.Email,
+		user.UpdatedBy,
+		time.Now().String(),
+		user.UserName,
+	)
+
+	if err != nil {
+		helper.ServiceError(err)
+		return err
+	}
+
+	lastInsertId, _ := result.LastInsertId()
+	rowsAffected, _ := result.RowsAffected()
+	log.Printf("Last updated Id %d. Affected rows %d\n", lastInsertId, rowsAffected)
+	return nil
+}
+
+//UpdatePassword updates the user's password
+func UpdatePassword(user *models.User) error {
+	db, err := sql.Open(DB_ENGINE, DB_NAME)
+
+	if err != nil {
+		helper.ServiceError(err)
+		return err
+	}
+
+	defer db.Close()
+
+	stm, err := db.Prepare(UPDATE_PASSWORD_SQL)
+
+	if err != nil {
+		helper.ServiceError(err)
+		return err
+	}
+
+	defer stm.Close()
+
+	result, err := stm.Exec(
+		user.Password,
+		user.UpdatedBy,
+		time.Now().String(),
+		user.UserName,
+	)
+
+	if err != nil {
+		helper.ServiceError(err)
+		return err
+	}
+
+	lastInsertId, _ := result.LastInsertId()
+	rowsAffected, _ := result.RowsAffected()
+	log.Printf("Last updated Id %d. Affected rows %d\n", lastInsertId, rowsAffected)
+	return nil
+}
+
+//GetMemberById get a member by Id
+func GetUserByName(userName string) (*models.User, error){
+	db, err := sql.Open(DB_ENGINE, DB_NAME)
+	
+	if err != nil {
+		helper.ServiceError(err)
+		return &models.User{}, err
+	}
+
+	defer db.Close()
+
+	stmt, err := db.Prepare(SELECT_USER_BY_NAME_SQL)
+
+	if err != nil {
+		helper.ServiceError(err)
+		return &models.User{}, err
+	}
+
+	defer stmt.Close()
+
+	var user models.User
+	err = stmt.QueryRow(userName).Scan(&user.UserName, 
+								  &user.FirstName,
+								  &user.LastName,
+								  &user.ContactNumber,
+								  &user.Email,
+								)
+	
+	if err != nil {
+		helper.ServiceError(err)
+		return &models.User{}, err
+	}
+	return &user, nil
+}
+
+//AuthenticateUser authenticates a user in the database
+func AuthenticateUser(userName, password string) error{
+	db, err := sql.Open(DB_ENGINE, DB_NAME)
+	
+	if err != nil {
+		helper.ServiceError(err)
+		return err
+	}
+
+	defer db.Close()
+
+	stmt, err := db.Prepare(VALIDATE_USER_SQL)
+
+	if err != nil {
+		helper.ServiceError(err)
+		return err
+	}
+
+	defer stmt.Close()
+
+	var hashedPassword string
+	err = stmt.QueryRow(userName).Scan(hashedPassword, 
+								  userName,
+								)
+	if err != nil {
+		helper.ServiceError(err)
+		return err
+	} 
+
+	err = bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
+	if err == bcrypt.ErrMismatchedHashAndPassword {
+		return errors.New("incorrect password")
+	} else if err != nil {
+		return err
+	}
+	return nil
+}
+
+
 //GetMembers get slice of members from database based on matching conditions
 func GetMembers(member *models.Member) ([]models.Member, error){
 	return []models.Member{}, nil
@@ -194,7 +406,7 @@ func GetAllMembers() ([]models.Member, error){
 
 	defer db.Close()
 
-	rows, err := db.Query(SELECT_MEMBER_ALL)
+	rows, err := db.Query(SELECT_MEMBER_ALL_SQL)
 
 	if err != nil {
 		helper.ServiceError(err)
@@ -290,7 +502,7 @@ func executeSearchQuery(condition string) ([]models.Member, error) {
 
 	defer db.Close()
 
-	rows, err := db.Query(SEARCH_MEMBERS + condition)
+	rows, err := db.Query(SEARCH_MEMBERS_SQL + condition)
 
 	if err != nil {
 		helper.ServiceError(err)

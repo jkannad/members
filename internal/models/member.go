@@ -19,6 +19,10 @@ type Member struct {
 	ContactNumber string `json:"contact_number" isRequired:"true" length:"15"`
 	DialCode	  string `json:"dial_code" isRequired:"false"`
 	Email         string `json:"email" isRequired:"false" length:"150"`
+	CreatedAt	  string `json:"created_at" isRequired:"false"`
+	UpdatedAt     string `json:"updated_at" isRequired:"false"`
+	CreatedBy     string `json:"created_by" isRequired:"false"`
+	UpdatedBy     string `json:"updated_by" isRequired:"false"`
 }
 
 

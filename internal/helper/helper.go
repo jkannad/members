@@ -32,3 +32,11 @@ func ServiceError(err error){
 	trace := fmt.Sprintf("%s\n%s", err.Error(), debug.Stack())
 	appConfig.ErrorLogger.Println(trace)
 }
+
+func IsAuthenticated(r *http.Request) bool {
+	return appConfig.Session.Exists(r.Context(), "user_name")
+}
+
+func IsLoginRoute(r *http.Request) bool {
+	return r.URL.String() == config.GET_LOGIN
+}

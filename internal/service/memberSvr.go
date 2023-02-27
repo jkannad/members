@@ -62,3 +62,13 @@ func SearchMembers(search models.Search) ([]models.Member, error) {
 	return members, nil
 }
 
+//AuthenticateUser authenticates a user
+func AuthenticateUser(userName, password string) error{
+	err := repo.AuthenticateUser(userName, password)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+

@@ -19,6 +19,7 @@ const(
 	STATES = "states"
 	CITIES = "cities"
 	DIAL_CODES ="dialcodes"
+	USER_NAME = "user_name"
 )
 
 var appConfig *config.AppConfig
@@ -44,6 +45,11 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+func Logout(w http.ResponseWriter, r *http.Request) {
+	appConfig.Session.Remove(r.Context(), USER_NAME)
+	http.Redirect(w, r,  "/member/login", http.StatusFound)
+}
+
 func Search(w http.ResponseWriter, r *http.Request) {
 	//remoteIP := appConfig.Session.GetString(r.Context(), "remote_ip")
 	stringMap := make(map[string]string)
@@ -59,6 +65,7 @@ func Search(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+//PostLogin validate the user id and redirect to respective pages
 func PostLogin(w http.ResponseWriter, r *http.Request) {
 	_ = appConfig.Session.RenewToken(r.Context()) //It helps in preventing session fixation attack
 	err := r.ParseForm()
@@ -70,8 +77,14 @@ func PostLogin(w http.ResponseWriter, r *http.Request) {
 	userName := r.FormValue("user_name")
 	password := r.FormValue("password")
 
-	fmt.Println(userName, password)
-
+	err = service.AuthenticateUser(userName, password)
+	if err != nil {
+		appConfig.Session.Put(r.Context(), "error", "Invalid login credentials")
+		http.Redirect(w, r, "/member/login", http.StatusSeeOther)
+		return
+	}
+	appConfig.Session.Put(r.Context(), USER_NAME, userName)
+	http.Redirect(w, r, "/", http.StatusFound)
 }
 
 func SearchResult(w http.ResponseWriter, r *http.Request) {
@@ -109,7 +122,7 @@ func SearchResult(w http.ResponseWriter, r *http.Request) {
 }
 
 func Register(w http.ResponseWriter, r *http.Request) {
-	//remoteIP := appConfig.Session.GetString(r.Context(), "remote_ip")
+	
 	stringMap := make(map[string]string)
 	stringMap["title"] = "Register Member"
 	countries, err := service.GetCountries()
@@ -138,7 +151,8 @@ type response struct {
 }
 
 func UpsertMember(w http.ResponseWriter, r *http.Request) {
-	//w.Header().Set("Content-Type", "application/json")
+	
+	userName := appConfig.Session.GetString(r.Context(), USER_NAME)
 	err := r.ParseForm()
 	if err != nil {
 		helper.ServerError(w, err)
@@ -163,10 +177,12 @@ func UpsertMember(w http.ResponseWriter, r *http.Request) {
 		Email: r.FormValue("email"),
 	}
 
-
 	if r.FormValue("id") != "" {
 		id, _ := strconv.Atoi(r.FormValue("id"))
 		member.Id = id
+		member.UpdatedBy = userName
+	} else {
+		member.CreatedBy = userName
 	}
 
 	validationErrors := config.ValidateFormData(&member, appConfig.FormFieldConfig["member"])
@@ -200,6 +216,7 @@ func UpsertMember(w http.ResponseWriter, r *http.Request) {
 		helper.ServerError(w, e)
 		return
 	}
+	w.Header().Set("Content-Type", "application/json")
 	w.Write(out)
 }
 

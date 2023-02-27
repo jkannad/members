@@ -130,9 +130,9 @@ func UpdateMember(member *models.Member) error{
 		member.DialCode,
 		member.ContactNumber,
 		member.Email,
-		member.Id,
 		member.UpdatedBy,
 		time.Now().String(),
+		member.Id,
 	)
 
 	if err != nil {
@@ -372,9 +372,7 @@ func AuthenticateUser(userName, password string) error{
 	defer stmt.Close()
 
 	var hashedPassword string
-	err = stmt.QueryRow(userName).Scan(hashedPassword, 
-								  userName,
-								)
+	err = stmt.QueryRow(userName).Scan(&hashedPassword)
 	if err != nil {
 		helper.ServiceError(err)
 		return err

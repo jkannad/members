@@ -5,19 +5,23 @@
             <form id="login" class="needs-validation" novalidate action="/member/login" method="POST">
                 <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
                 <div class="mb-3 row">
-                    <div class="col">
-                        <label for="user_name" class="col-sm-12 col-form-label">User name</label>
-                    </div>
-                    <div class="col-sm-9">
-                        <input type="text" class="form-control" id="user_name" name="user_name" value="" required>
+                    <div class="col-sm-12">
+                        <label for="user_name" class="form-label">User Name</label>
+                        <input required type="text" class="form-control" id="user_name" name="user_name"
+                            placeholder="" value="" required>
+                        <div class="invalid-feedback">
+                            User name is required.
+                        </div>
                     </div>
                 </div>
                 <div class="mb-3 row">
-                    <div class="col">
-                        <label for="inputPassword" class="col-sm-12 col-form-label">Password</label>
-                    </div>
-                    <div class="col-sm-9">
-                        <input type="password" class="form-control" id="password" name="password" required>
+                    <div class="col-sm-12">
+                        <label for="password" class="form-label">Password</label>
+                        <input required type="password" class="form-control" id="password" name="password"
+                            placeholder="" value="" required>
+                        <div class="invalid-feedback">
+                            Password is required.
+                        </div>
                     </div>
                 </div>
                 <div class="d-grid col-3 mx-auto">

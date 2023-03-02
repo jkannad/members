@@ -29,6 +29,9 @@
                         <div class="collapse navbar-collapse" id="navbarNavDropdown">
                             <ul class="navbar-nav me-auto my-2 my-lg-0 navbar-nav-scroll"
                                 style="--bs-scroll-height: 100px;">
+                                <a class="navbar-brand" href="/member/search">
+                                    <img src="/static/images/shri.png" alt="SPAA" width="25" height="23">
+                                </a>
                                 <li class="nav-item">
                                     <a class="nav-link active" aria-current="page"
                                         href="/member/search">Search</a>
@@ -43,7 +46,7 @@
                                 </li>
                                 <li class="nav-item">
                                     <a class="nav-link active" aria-current="page"
-                                        href="/member/logout">Logout</a>
+                                        href="#" onclick="confirmLogout();">Logout</a>
                                 </li>
                             </ul>
                         </div>
@@ -72,6 +75,34 @@
                 </ul>
             </footer>
         </div>
+        <script>
+            function confirmLogout() {
+                Swal.fire({
+                    title: 'Do you want to logout?',
+                    showCancelButton: true,
+                    confirmButtonText: 'Yes',
+                    }).then((result) => {
+                    if (result.isConfirmed) {
+                        fetch('/member/logout', {
+                            method: "get",
+                        })
+                        .then(response => {
+                            if (response.redirected) {
+                                window.location.href = response.url
+                            }
+                        })
+                        .catch(error => {
+                            notify.error({
+                                title: "Error",
+                                msg: "Internal Server Error. Please try later or get in touch with system adminstrator",
+                                footer: "",
+                            })
+                        });
+                    }
+                })
+            }
+            
+        </script>
         <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"
             integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3"
             crossorigin="anonymous"></script>

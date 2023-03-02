@@ -19,11 +19,13 @@
     <body class="bg-light">
         <div class="container">
             <main>
-                <div class="py-1 text-center">
-                    <img src="/static/images/banner.png" class="img-fluid" alt="Responsive image" width="860px">
-                    <p id="" class="text-center">
-                        <h5>{{index .StringMap "title"}}</h5>
-                    </p>
+                <div class="container-fluid">
+                    <div class="py-1 text-center">
+                        <img src="/static/images/banner.png" class="img-fluid" alt="Responsive image" width="860px">
+                        <p id="" class="text-center">
+                            <h5>{{index .StringMap "title"}}</h5>
+                        </p>
+                    </div>
                 </div>
                 {{block "content" .}}
                 

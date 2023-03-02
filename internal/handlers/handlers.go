@@ -40,13 +40,16 @@ func About(w http.ResponseWriter, r *http.Request) {
 func Login(w http.ResponseWriter, r *http.Request) {
 	stringMap := make(map[string]string)
 	stringMap["title"] = "Login"
+	appConfig.Session.Remove(r.Context(), USER_NAME)
 	render.RenderTemplate(w, r, "login.page.tmpl", &models.TemplateData{
 		StringMap: stringMap,
 	})
 }
 
 func Logout(w http.ResponseWriter, r *http.Request) {
-	appConfig.Session.Remove(r.Context(), USER_NAME)
+	_ = appConfig.Session.Destroy(r.Context())
+	_ = appConfig.Session.RenewToken(r.Context())
+
 	http.Redirect(w, r,  "/member/login", http.StatusFound)
 }
 

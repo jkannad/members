@@ -1,7 +1,7 @@
 package main
 
 import (
-	"os"
+	"os" 
 	"fmt"
 	"log"
 	"net/http"
@@ -14,7 +14,7 @@ import (
 	"github.com/jkannad/spas/members/internal/helper"
 )
 
-const PortNumber = ":1709"
+const PortNumber = ":8080"
 
 var app config.AppConfig
 var session *scs.SessionManager
